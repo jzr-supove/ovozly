@@ -1,0 +1,5 @@
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2  # Explicitly enforce 2 blank lines
