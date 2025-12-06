@@ -6,21 +6,27 @@ The main task orchestrates the complete pipeline: diarization, transcription,
 and AI-powered conversation analysis.
 """
 
+import sys
+from pathlib import Path
+
+# Ensure the backend directory is in Python path for imports
+_backend_dir = Path(__file__).parent.parent
+if str(_backend_dir) not in sys.path:
+    sys.path.insert(0, str(_backend_dir))
+
 import time
 from io import BytesIO
 
 from celery.exceptions import Ignore
 from loguru import logger
 
-from ai.audio_utils import (
-    audio_to_text_v2,
-    merge_diarization_and_text,
-    split_audio_into_segments,
-)
+from ai.audio_utils import get_audio_duration
 from ai.openai import analyze_conversation
 from ai.pyannoteai import PyAnnoteAI_Status, pyannoteai
+from ai.aisha_stt import transcribe_with_diarization
 from core.base_task import BaseTask
 from core.celery_app import celery
+from core.config import settings
 from db import Call
 
 
@@ -35,16 +41,15 @@ def convert_audio_to_text(self, audio_raw: bytes, audio_ext: str, call_id: int) 
     """
     Process audio file through the complete analysis pipeline.
 
-    This task performs the following steps:
+    Pipeline steps:
     1. Submit audio to PyAnnote AI for speaker diarization
-    2. Split audio into speaker segments based on diarization
-    3. Transcribe each segment using the STT model
-    4. Merge diarization data with transcription results
-    5. Analyze conversation using OpenAI GPT
+    2. Wait for diarization to complete
+    3. Split audio by diarization segments and transcribe with AISHA
+    4. Analyze conversation using OpenAI GPT
 
     Args:
         audio_raw: Raw audio file bytes
-        audio_ext: Audio file extension (e.g., 'wav', 'mp3')
+        audio_ext: Audio file extension (e.g., 'wav', 'mp3', 'm4a')
         call_id: Database ID of the Call record
 
     Returns:
@@ -59,11 +64,10 @@ def convert_audio_to_text(self, audio_raw: bytes, audio_ext: str, call_id: int) 
         audio = BytesIO(audio_raw)
         set_state(self, "loading audio file")
 
-        # diarization job
+        # Step 1: Submit to PyAnnote for diarization
         status, job_id = pyannoteai.submit(call.file_id)
         logger.debug(f"pyannoteai {job_id=}")
 
-        # Check if submit successful
         if not job_id:
             logger.error("diarization submit error, status: %s", status)
             call.status = "FAIL"
@@ -74,9 +78,9 @@ def convert_audio_to_text(self, audio_raw: bytes, audio_ext: str, call_id: int) 
             )
             raise Ignore()
 
-        set_state(self, "audio submitted, generating diarization...")
+        set_state(self, "audio submitted, waiting for diarization...")
 
-        # Check job status until done
+        # Step 2: Wait for diarization to complete
         status, diarization_data = pyannoteai.check_job(job_id)
         while status in (
             PyAnnoteAI_Status.CREATED,
@@ -130,26 +134,22 @@ def convert_audio_to_text(self, audio_raw: bytes, audio_ext: str, call_id: int) 
             )
             raise Ignore()
 
-        diarization_data = diarization_data["output"]["diarization"]
+        diarization_segments = diarization_data["output"]["diarization"]
+        logger.debug(f"Got {len(diarization_segments)} diarization segments")
 
-        # Split audio into segments
-        set_state(self, "got diarization result, splitting audio into segments")
-        segments = split_audio_into_segments(audio, audio_ext, diarization_data, do_merge=False)
+        # Step 3: Transcribe audio segments using AISHA (with speaker mapping)
+        set_state(self, "transcribing audio with AISHA...")
+        audio.seek(0)
+        result = transcribe_with_diarization(
+            audio_file=audio,
+            audio_ext=audio_ext,
+            diarization_segments=diarization_segments,
+            language="uz",
+        )
+        logger.debug(f"AISHA transcription complete: {len(result)} segments")
 
-        # Speech To Text
-        set_state(self, "converting audio segments into text")
-        texts = []
-        for segment in segments:
-            segment.seek(0)
-            text = audio_to_text_v2(segment)
-            texts.append(text)
-
-        # Merge Diarization with STT results
-        set_state(self, "preparing results")
-        result = merge_diarization_and_text(diarization_data, texts)
-
-        # Analyze the text using openai api
-        set_state(self, "generating analysis")
+        # Step 4: Analyze the conversation using OpenAI
+        set_state(self, "generating analysis...")
         analysis = analyze_conversation(result)
 
         call.status = "SUCCESS"

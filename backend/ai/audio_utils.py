@@ -5,7 +5,7 @@ from typing import Any
 from io import BytesIO
 from pydub import AudioSegment
 
-from ai.loader import device, get_model, get_processor
+from core.config import settings
 
 
 def split_audio(audio: Any, max_length: int = 5) -> list:
@@ -26,8 +26,10 @@ def convert_mp3_to_wav(mp3_file: Any) -> BytesIO:
 
 def process_audio_chunk(chunk, *args) -> list:
     """
-    Process a single chunk of audio to text
+    Process a single chunk of audio to text (local model only).
     """
+    from ai.loader import device, get_model, get_processor
+
     audio_inputs = get_processor()(audios=chunk, return_tensors="pt", sampling_rate=16_000)
     audio_inputs = {key: tensor.to(device) for key, tensor in audio_inputs.items()}
 
@@ -42,8 +44,10 @@ def process_audio_chunk(chunk, *args) -> list:
 
 def audio_to_text(audio_file, max_length=10):
     """
-    Convert audio to text, processing in chunks if necessary
+    Convert audio to text, processing in chunks if necessary (local model only).
     """
+    from ai.loader import get_processor
+
     # Load and resample the audio
     audio, orig_freq = torchaudio.load(audio_file)
     audio = torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=16_000)
@@ -80,6 +84,40 @@ def audio_to_text(audio_file, max_length=10):
 
 
 def audio_to_text_v2(audio_file: BytesIO) -> str:
+    """
+    Convert audio to text using the configured STT provider.
+
+    Uses either local Seamless M4T model or OpenAI Whisper API
+    based on the STT_PROVIDER setting.
+
+    Args:
+        audio_file: Audio data as BytesIO (WAV format)
+
+    Returns:
+        Transcribed text
+    """
+    if settings.STT_PROVIDER == "whisper":
+        return _transcribe_with_whisper(audio_file)
+    else:
+        return _transcribe_with_local_model(audio_file)
+
+
+def _transcribe_with_whisper(audio_file: BytesIO) -> str:
+    """
+    Transcribe audio using OpenAI Whisper API (fast, cloud-based).
+    """
+    from ai.whisper_api import transcribe_audio_whisper
+
+    audio_file.seek(0)
+    return transcribe_audio_whisper(audio_file)
+
+
+def _transcribe_with_local_model(audio_file: BytesIO) -> str:
+    """
+    Transcribe audio using local Seamless M4T model (slow, GPU-based).
+    """
+    from ai.loader import device, get_model, get_processor
+
     audio, orig_freq = torchaudio.load(audio_file, format="wav", backend="soundfile")
 
     audio = torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=16_000)

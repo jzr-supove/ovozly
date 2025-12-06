@@ -35,6 +35,7 @@ class Settings(BaseSettings):
         PYANNOTEAI_TOKEN: API token for PyAnnote AI diarization
         OPENAI_API_KEY: OpenAI API key for conversation analysis
         AISHA_API_KEY: AISHA STT service API key
+        STT_PROVIDER: Speech-to-text provider ("local" or "whisper")
     """
     DATABASE_URL: str
     REDIS_URL: str
@@ -45,6 +46,9 @@ class Settings(BaseSettings):
     PYANNOTEAI_TOKEN: str
     OPENAI_API_KEY: str
     AISHA_API_KEY: str
+
+    # STT Provider: "local" for Seamless M4T, "whisper" for OpenAI Whisper API
+    STT_PROVIDER: str = "whisper"
 
     @field_validator("DEBUG", mode="before")
     def validate_debug(cls, value):
