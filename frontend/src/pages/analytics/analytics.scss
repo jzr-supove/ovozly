@@ -1,0 +1,31 @@
+.chart_total {
+  .chart_total__main {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--bs-gray-700);
+  }
+  .chart_total__sub {
+    color: #8c8c8c;
+  }
+}
+
+.heatmap-container {
+  text-align: center;
+  .heatmap-item {
+    padding: 5px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+  }
+  .low-performance {
+    background-color: #f28b82; /* Red */
+  }
+
+  .mid-performance {
+    background-color: #a7c7e7; /* Purple */
+  }
+
+  .high-performance {
+    background-color: #81c995; /* Green */
+  }
+}

@@ -1,0 +1,19 @@
+.analytics-stats {
+  .ant-statistic-content-suffix {
+    font-size: 14px;
+    color: #21b76d;
+  }
+  .ant-statistic-content-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--bs-gray-700);
+  }
+}
+
+.customer-sentiment {
+  .ant-statistic-title {
+    margin-bottom: 10px;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 14px;
+  }
+}

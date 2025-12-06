@@ -1,0 +1,57 @@
+.call-card {
+  min-width: 125px;
+  border-radius: 8px;
+  border-style: dashed;
+  border-color: #dbdfe9;
+  border-width: 1px;
+  &__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  &__subtitle {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #99a1b7;
+  }
+  &__icon {
+    font-size: 1.2rem !important;
+  }
+}
+.entities-extracted-card {
+  .ant-card-body {
+    padding-bottom: 50px;
+  }
+}
+.speech-analysis {
+  .call-card__icon {
+    font-size: 1.2rem !important;
+  }
+  .call-card__title {
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  .call-card__subtitle {
+    font-size: 14px;
+  }
+}
+.single-call-info {
+  .ant-card-body {
+    padding-bottom: 0;
+  }
+}
+.single-call-tab {
+  .ant-tabs-nav {
+    margin: 0;
+    &::before {
+      content: none;
+    }
+    .ant-tabs-nav-wrap {
+      &::before {
+        content: none;
+      }
+    }
+    .ant-tabs-tab {
+      padding-bottom: 16px;
+    }
+  }
+}

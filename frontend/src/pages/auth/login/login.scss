@@ -1,0 +1,90 @@
+.login-form {
+  .login-form__row {
+    margin-bottom: 30px;
+  }
+  .ant-form-item-row {
+    label {
+      font-weight: 600;
+      color: #071437;
+    }
+  }
+  .ant-form-item-control {
+    .ant-input-affix-wrapper {
+      background-color: var(--bs-gray-100);
+      border-color: var(--bs-gray-100);
+      border-radius: 0.475rem;
+      box-shadow: none !important;
+      color: var(--bs-gray-700);
+      font-weight: 500;
+      height: 45px;
+      outline-color: #4b5675;
+      outline: 0 !important;
+      padding: 0;
+      padding-right: 10px;
+      transition: color 0.2s ease;
+      &.ant-input-affix-wrapper-focused.ant-input-outlined {
+        &:focus {
+          background-color: #f1f1f2;
+          border-color: #f1f1f2;
+          box-shadow: none !important;
+        }
+      }
+      &.ant-input-outlined.ant-input-status-error {
+        background-color: var(--bs-gray-100);
+        border-color: var(--bs-gray-100);
+        &:focus {
+          background-color: #f1f1f2;
+          border-color: #f1f1f2;
+        }
+      }
+    }
+
+    input {
+      background-color: var(--bs-gray-100);
+      border-color: var(--bs-gray-100);
+      border-radius: 0.475rem;
+      box-shadow: none !important;
+      color: var(--bs-gray-700);
+      font-weight: 500;
+      height: 45px;
+      outline-color: #4b5675;
+      outline: 0 !important;
+      padding: 0.775rem 1rem;
+      transition: color 0.2s ease;
+      &:focus {
+        background-color: #f1f1f2;
+        border-color: #f1f1f2;
+        color: #4b5675;
+        transition: color 0.2s ease;
+      }
+      &.ant-input-outlined.ant-input-status-error {
+        background-color: var(--bs-gray-100);
+        border-color: var(--bs-gray-100);
+        &:focus {
+          background-color: #f1f1f2;
+          border-color: #f1f1f2;
+        }
+      }
+    }
+  }
+  .ant-form-item-explain-error {
+    display: block;
+    font-weight: 400;
+    width: 100%;
+    margin-top: 0.5rem;
+    font-size: 13px;
+    color: #f1416c;
+  }
+
+  .login-form__submit-btn {
+    color: #fff;
+    border-color: #3e97ff;
+    background-color: #3e97ff;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 19px 0;
+  }
+  label.ant-checkbox-wrapper {
+    color: #99a1b7;
+  }
+}

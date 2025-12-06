@@ -1,0 +1,48 @@
+.calls-table {
+  .ant-table-thead {
+    tr th {
+      border-bottom: 1px dashed #f1f1f4;
+      background: none;
+      color: #99a1b7;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      &::before {
+        content: none !important;
+      }
+    }
+  }
+  .ant-table-tbody {
+    tr td {
+      border-bottom: 1px dashed #f1f1f4;
+    }
+  }
+  .view-call {
+    background-color: var(--bs-light);
+    width: 30px;
+    height: 30px;
+  }
+  .ant-tag {
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    text-transform: lowercase !important;
+    &.ant-tag-blue {
+      background-color: #e9f3ff;
+      color: #1b84ff;
+    }
+    &.ant-tag-green {
+      background-color: #dfffea;
+      color: #17c653;
+    }
+    &.ant-tag-red {
+      background-color: #ffeef3;
+      color: #f8285a;
+    }
+    &.ant-tag-orange {
+      background-color: #fff8dd;
+      color: #f6c000;
+    }
+  }
+}

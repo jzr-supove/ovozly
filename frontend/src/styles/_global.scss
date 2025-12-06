@@ -1,0 +1,32 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+.bullet {
+  height: 40px;
+  display: inline-block;
+  background-color: var(--bs-bullet-bg-color);
+  border-radius: 6px;
+  width: 4px;
+  flex-shrink: 0;
+}
+.bg-success {
+  --bs-bg-rgb-color: rgb(23, 198, 83);
+  background-color: #17c653 !important;
+}
+
+.skeleton-custom-style {
+  .ant-skeleton-title {
+    height: 12px !important;
+    margin-bottom: 0;
+  }
+}
+.separator {
+  display: block;
+  height: 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  border-bottom-style: dashed;
+  border-bottom-color: #dbdfe9;
+}
+body.swal2-shown.swal2-height-auto {
+  height: 100% !important;
+}
