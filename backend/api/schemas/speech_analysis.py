@@ -1,36 +1,68 @@
-from pydantic import BaseModel
-from typing import List
-from datetime import datetime
+"""
+Pydantic schemas for SpeechAnalysis model.
+"""
 
-from db.models.action import Action
-from db.models.extracted_entity import ExtractedEntity
-from db.models.intent import Intent
-from db.models.issue import Issue
-from db.models.keypoint import Keypoint
+from datetime import datetime
+from typing import List, Optional, Any, Dict
+from uuid import UUID
+
+from pydantic import BaseModel
+
+from api.schemas.action import Action
+from api.schemas.extracted_entity import ExtractedEntity
+from api.schemas.intent import Intent
+from api.schemas.issue import Issue
+from api.schemas.keypoint import Keypoint
+
+
+class DiarizationSegment(BaseModel):
+    """A single diarization segment with speaker, timestamps, and text."""
+    speaker: str
+    start: float
+    end: float
+    text: Optional[str] = None
 
 
 class SpeechAnalysisBase(BaseModel):
-    call_id: str
     language: str
-    transcript: int
+    transcript: str
+    customer_sentiment: Optional[str] = None
+    agent_sentiment: Optional[str] = None
+    overall_sentiment: Optional[str] = None
+    call_efficiency: Optional[str] = None
+    resolution_status: Optional[str] = None
 
 
 class SpeechAnalysisCreate(SpeechAnalysisBase):
-    pass
-
-
-class SpeechAnalysisUpdate(SpeechAnalysisBase):
-    pass
+    call_id: int
+    raw_diarization: Optional[List[Dict[str, Any]]] = None
 
 
 class SpeechAnalysis(SpeechAnalysisBase):
-    id: str
+    id: UUID
+    call_id: int
+    raw_diarization: Optional[List[Dict[str, Any]]] = None
     created_at: datetime
-    extracted_entities: List["ExtractedEntity"] = []
-    keypoints: List["Keypoint"] = []
-    actions: List["Action"] = []
-    issues: List["Issue"] = []
-    intents: List["Intent"] = []
+
+    # Related entities
+    intents: List[Intent] = []
+    extracted_entities: List[ExtractedEntity] = []
+    issues: List[Issue] = []
+    actions: List[Action] = []
+    keypoints: List[Keypoint] = []
+
+    class Config:
+        from_attributes = True
+
+
+class SpeechAnalysisSummary(BaseModel):
+    """Simplified analysis summary for list views."""
+    id: UUID
+    language: str
+    overall_sentiment: Optional[str] = None
+    call_efficiency: Optional[str] = None
+    resolution_status: Optional[str] = None
+    created_at: datetime
 
     class Config:
         from_attributes = True

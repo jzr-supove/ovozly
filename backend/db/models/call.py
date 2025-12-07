@@ -39,4 +39,4 @@ class Call(Base):
     created_at = Column(DateTime, default=datetime.now)
 
     user = relationship("User", back_populates="calls")
-    speech_analysis = relationship("SpeechAnalysis", back_populates="call")
+    speech_analysis = relationship("SpeechAnalysis", back_populates="call", uselist=False, cascade="all, delete-orphan")

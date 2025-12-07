@@ -1,25 +1,23 @@
-from pydantic import BaseModel
-from typing import Optional
+"""
+Pydantic schemas for Keypoint model.
+"""
+
 from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class KeypointBase(BaseModel):
-    analysis_id: Optional[str]
-    name: str
-    value: str
-    confidence_score: float
+    point: str
 
 
 class KeypointCreate(KeypointBase):
     pass
 
 
-class KeypointUpdate(KeypointBase):
-    pass
-
-
 class Keypoint(KeypointBase):
-    id: str
+    id: UUID
     created_at: datetime
 
     class Config:

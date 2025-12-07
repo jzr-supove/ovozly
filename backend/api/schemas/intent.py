@@ -1,24 +1,25 @@
-from pydantic import BaseModel
-from typing import Optional
+"""
+Pydantic schemas for Intent model.
+"""
+
 from datetime import datetime
+from typing import Optional
+from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class IntentBase(BaseModel):
-    analysis_id: Optional[str]
     intent: str
-    confidence_score: Optional[float]
+    confidence_score: Optional[float] = None
 
 
 class IntentCreate(IntentBase):
     pass
 
 
-class IntentUpdate(IntentBase):
-    pass
-
-
 class Intent(IntentBase):
-    id: str
+    id: UUID
     created_at: datetime
 
     class Config:

@@ -1,11 +1,15 @@
-from pydantic import BaseModel
-from typing import Optional
+"""
+Pydantic schemas for Issue model.
+"""
+
 from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class IssueBase(BaseModel):
-    analysis_id: Optional[str]
-    name: str
+    issue_type: str
     description: str
 
 
@@ -13,12 +17,8 @@ class IssueCreate(IssueBase):
     pass
 
 
-class IssueUpdate(IssueBase):
-    pass
-
-
 class Issue(IssueBase):
-    id: str
+    id: UUID
     created_at: datetime
 
     class Config:

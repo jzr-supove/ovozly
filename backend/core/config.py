@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     REDIS_URL: str
     JWT_KEY: str
     DEBUG: bool
-    BUCKET_NAME: str = "ovozly_bucket"
+    BUCKET_NAME: str = "ovozly-bucket"
     PYANNOTEAI_TOKEN: str
     OPENAI_API_KEY: str
     AISHA_API_KEY: str
