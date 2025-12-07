@@ -443,10 +443,19 @@
     }
 
     .section-title {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
       font-size: 1.1rem;
       font-weight: 600;
       color: #3f4254;
       margin: 0 0 20px 0;
+
+      .section-subtitle {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: #99a1b7;
+      }
     }
 
     .empty-state {

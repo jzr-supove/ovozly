@@ -41,7 +41,7 @@ import { CallWithAnalysis, CallStatus } from "@/pages/calls/types/callsTypes";
 import SpeechAnalysis from "./components/SpeechAnalysis";
 import Recommendations from "./components/Recommendations";
 import SummaryAnalysis from "./components/SummaryAnalysis";
-import AudioPlayer from "../calls/components/audioPlayer";
+import AudioPlayer, { AudioPlayerRef } from "../calls/components/audioPlayer/AudioPlayer";
 import {
   formatDateShort,
   formatTimeShort,
@@ -93,12 +93,14 @@ const SingleCall = () => {
   const [currentStatus, setCurrentStatus] = useState<CallStatus>(
     CallStatus.PENDING
   );
+  const [currentTime, setCurrentTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioPlayerRef = useRef<AudioPlayerRef>(null);
 
   // Derived state
   const statusConfig = STATUS_CONFIG[currentStatus] || STATUS_CONFIG.PENDING;
@@ -117,6 +119,23 @@ const SingleCall = () => {
   const onTabChange = (activeKey: string) => {
     setActiveTab(activeKey as TabKey);
   };
+
+  /**
+   * Handle audio time update from player.
+   */
+  const handleTimeUpdate = useCallback((time: number) => {
+    setCurrentTime(time);
+  }, []);
+
+  /**
+   * Handle seeking from transcript segment click.
+   */
+  const handleSegmentClick = useCallback((startTime: number) => {
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.seekTo(startTime);
+      audioPlayerRef.current.play();
+    }
+  }, []);
 
   /**
    * Fetch call details from database.
@@ -286,6 +305,9 @@ const SingleCall = () => {
                 description: i.description,
               })),
             }}
+            diarizationSegments={speechAnalysis.raw_diarization}
+            currentTime={currentTime}
+            onSegmentClick={handleSegmentClick}
           />
         );
       case "summary_analysis":
@@ -399,7 +421,11 @@ const SingleCall = () => {
               Audio Recording
             </h3>
             {callData?.file_id ? (
-              <AudioPlayer audioUrl={callData.file_id} />
+              <AudioPlayer
+                ref={audioPlayerRef}
+                audioUrl={callData.file_id}
+                onTimeUpdate={handleTimeUpdate}
+              />
             ) : (
               <div className="no-audio">
                 <p>Audio file not available</p>

@@ -1,8 +1,16 @@
-import React from "react";
+/**
+ * SpeechAnalysis Component
+ *
+ * Displays speech analysis results including sentiment, entities,
+ * intents, transcript (chat-like), and identified issues.
+ */
 
+import React from "react";
 import { Card, Col, Row } from "antd";
 import { SmileOutlined, UserOutlined } from "@ant-design/icons";
 import { capitalize } from "@/utils/helpers";
+import { DiarizationSegment } from "@/pages/calls/types/callsTypes";
+import ChatTranscript from "./ChatTranscript";
 
 export interface SpeechAnalysisType {
   transcript: string;
@@ -27,6 +35,12 @@ export interface SpeechAnalysisType {
 
 interface SpeechAnalysisProps {
   speechAnalysis: SpeechAnalysisType | undefined;
+  /** Raw diarization segments for chat-like transcript display */
+  diarizationSegments?: DiarizationSegment[] | null;
+  /** Current audio playback time in seconds */
+  currentTime?: number;
+  /** Callback when user clicks on a transcript segment */
+  onSegmentClick?: (startTime: number) => void;
 }
 
 /**
@@ -38,7 +52,15 @@ const formatConfidence = (score: number): string => {
   return `${Math.round(percentage)}%`;
 };
 
-const SpeechAnalysis: React.FC<SpeechAnalysisProps> = ({ speechAnalysis }) => {
+const SpeechAnalysis: React.FC<SpeechAnalysisProps> = ({
+  speechAnalysis,
+  diarizationSegments,
+  currentTime = 0,
+  onSegmentClick,
+}) => {
+  // Use diarization segments if available, otherwise fall back to plain transcript
+  const hasDiarization = diarizationSegments && diarizationSegments.length > 0;
+
   return (
     <Row gutter={[24, 24]} className="speech-analysis">
       {/* First Row: Sentiment, Entities, Intent */}
@@ -91,7 +113,8 @@ const SpeechAnalysis: React.FC<SpeechAnalysisProps> = ({ speechAnalysis }) => {
                 </div>
               </div>
             ))}
-            {(!speechAnalysis?.entities_extracted || speechAnalysis.entities_extracted.length === 0) && (
+            {(!speechAnalysis?.entities_extracted ||
+              speechAnalysis.entities_extracted.length === 0) && (
               <div className="empty-state">No entities extracted</div>
             )}
           </div>
@@ -113,7 +136,8 @@ const SpeechAnalysis: React.FC<SpeechAnalysisProps> = ({ speechAnalysis }) => {
                 </div>
               </div>
             ))}
-            {(!speechAnalysis?.intent_detection || speechAnalysis.intent_detection.length === 0) && (
+            {(!speechAnalysis?.intent_detection ||
+              speechAnalysis.intent_detection.length === 0) && (
               <div className="empty-state">No intents detected</div>
             )}
           </div>
@@ -123,10 +147,23 @@ const SpeechAnalysis: React.FC<SpeechAnalysisProps> = ({ speechAnalysis }) => {
       {/* Second Row: Transcript and Issues */}
       <Col xs={24} md={16}>
         <Card className="analysis-section-card transcript-card">
-          <h4 className="section-title">Transcript</h4>
-          <div className="transcript-content">
-            <pre>{speechAnalysis?.transcript || "No transcript available"}</pre>
-          </div>
+          <h4 className="section-title">
+            Transcript
+            {hasDiarization && (
+              <span className="section-subtitle">Click on a message to play from that point</span>
+            )}
+          </h4>
+          {hasDiarization ? (
+            <ChatTranscript
+              segments={diarizationSegments}
+              currentTime={currentTime}
+              onSegmentClick={onSegmentClick}
+            />
+          ) : (
+            <div className="transcript-content">
+              <pre>{speechAnalysis?.transcript || "No transcript available"}</pre>
+            </div>
+          )}
         </Card>
       </Col>
 
@@ -143,7 +180,8 @@ const SpeechAnalysis: React.FC<SpeechAnalysisProps> = ({ speechAnalysis }) => {
                 </div>
               </div>
             ))}
-            {(!speechAnalysis?.issues_identified || speechAnalysis.issues_identified.length === 0) && (
+            {(!speechAnalysis?.issues_identified ||
+              speechAnalysis.issues_identified.length === 0) && (
               <div className="empty-state">No issues identified</div>
             )}
           </div>
