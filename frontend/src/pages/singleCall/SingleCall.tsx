@@ -29,20 +29,25 @@ import {
   ExclamationCircleOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useCallback, useRef } from "react";
 
 import {
-  getTaskStatus,
-  TaskStatusResponse,
+  fetchCallDetails,
   deleteCall,
 } from "@/services/calls.service";
 import { getErrorMessage } from "@/services/api";
-import SpeechAnalysis, { SpeechAnalysisType } from "./components/SpeechAnalysis";
-import Recommendations, { ActionRecommendation } from "./components/Recommendations";
-import SummaryAnalysis, { SummaryAnalysisType } from "./components/SummaryAnalysis";
+import { CallWithAnalysis, CallStatus } from "@/pages/calls/types/callsTypes";
+import SpeechAnalysis from "./components/SpeechAnalysis";
+import Recommendations from "./components/Recommendations";
+import SummaryAnalysis from "./components/SummaryAnalysis";
 import AudioPlayer from "../calls/components/audioPlayer";
-import { formatDateShort, formatTimeShort, formatDuration, capitalize } from "@/utils/helpers";
+import {
+  formatDateShort,
+  formatTimeShort,
+  formatDuration,
+  capitalize,
+} from "@/utils/helpers";
 
 import "./singleCall.scss";
 
@@ -50,32 +55,29 @@ import "./singleCall.scss";
 type TabKey = "speech_analysis" | "summary_analysis" | "recommendations";
 
 /** Polling interval for RUNNING status (ms) */
-const STATUS_POLL_INTERVAL = 1000;
-
-/** Status type */
-type TaskStatus = "SUCCESS" | "RUNNING" | "FAILED" | "PENDING";
+const STATUS_POLL_INTERVAL = 2000;
 
 /** Status configuration */
 const STATUS_CONFIG: Record<
-  TaskStatus,
+  CallStatus,
   { color: string; icon: React.ReactNode; label: string }
 > = {
-  SUCCESS: {
+  [CallStatus.SUCCESS]: {
     color: "green",
     icon: <CheckCircleOutlined />,
     label: "Completed",
   },
-  RUNNING: {
+  [CallStatus.RUNNING]: {
     color: "blue",
     icon: <SyncOutlined spin />,
     label: "Processing",
   },
-  FAILED: {
+  [CallStatus.FAILED]: {
     color: "red",
     icon: <ExclamationCircleOutlined />,
     label: "Failed",
   },
-  PENDING: {
+  [CallStatus.PENDING]: {
     color: "orange",
     icon: <ClockCircleOutlined />,
     label: "Pending",
@@ -85,11 +87,12 @@ const STATUS_CONFIG: Record<
 const SingleCall = () => {
   const { callId } = useParams<{ callId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { created_at, call_duration, file_id } = location.state || {};
 
   const [activeTab, setActiveTab] = useState<TabKey>("speech_analysis");
-  const [taskStatus, setTaskStatus] = useState<TaskStatusResponse | null>(null);
+  const [callData, setCallData] = useState<CallWithAnalysis | null>(null);
+  const [currentStatus, setCurrentStatus] = useState<CallStatus>(
+    CallStatus.PENDING
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -97,18 +100,9 @@ const SingleCall = () => {
   const [error, setError] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Derived state from task status
-  const currentStatus = (taskStatus?.status as TaskStatus) || "PENDING";
+  // Derived state
   const statusConfig = STATUS_CONFIG[currentStatus] || STATUS_CONFIG.PENDING;
-  const actionRecommendations = taskStatus?.result?.action_recommendations as
-    | ActionRecommendation[]
-    | undefined;
-  const summaryAnalysis = taskStatus?.result?.summary_analysis as
-    | SummaryAnalysisType
-    | undefined;
-  const speechAnalysis = taskStatus?.result?.speech_analysis as
-    | SpeechAnalysisType
-    | undefined;
+  const speechAnalysis = callData?.speech_analysis;
 
   /**
    * Navigate back to the calls list.
@@ -125,40 +119,58 @@ const SingleCall = () => {
   };
 
   /**
-   * Fetch task status from API.
+   * Fetch call details from database.
    */
-  const fetchStatus = useCallback(
-    async (showLoading = true) => {
-      if (!callId) return;
+  const loadCallData = useCallback(async () => {
+    if (!callId) return;
 
-      try {
-        if (showLoading) {
-          setIsLoading(true);
-        }
-        setError(null);
-        const data = await getTaskStatus(callId);
-        setTaskStatus(data);
-      } catch (err) {
-        setError(getErrorMessage(err));
-      } finally {
-        if (showLoading) {
-          setIsLoading(false);
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const data = await fetchCallDetails(callId);
+      setCallData(data);
+      setCurrentStatus(data.status);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [callId]);
+
+  /**
+   * Poll for updates when status is RUNNING/PENDING.
+   */
+  const pollForUpdates = useCallback(async () => {
+    if (!callId) return;
+
+    try {
+      const data = await fetchCallDetails(callId);
+      setCallData(data);
+      setCurrentStatus(data.status);
+
+      // Stop polling if complete or failed
+      if (data.status === CallStatus.SUCCESS || data.status === CallStatus.FAILED) {
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
         }
       }
-    },
-    [callId]
-  );
+    } catch (err) {
+      console.error("Error polling for updates:", err);
+    }
+  }, [callId]);
 
   /**
    * Download the audio file.
    */
   const handleDownloadAudioClick = () => {
-    if (!file_id) return;
+    if (!callData?.file_id) return;
 
     setIsDownloading(true);
     const link = document.createElement("a");
-    link.href = file_id;
-    link.download = "";
+    link.href = callData.file_id;
+    link.download = callData.file_name || "audio";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -193,18 +205,18 @@ const SingleCall = () => {
 
   // Initial fetch
   useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+    loadCallData();
+  }, [loadCallData]);
 
-  // Set up polling for RUNNING status
+  // Set up polling for RUNNING/PENDING status
   useEffect(() => {
     const shouldPoll =
-      currentStatus === "RUNNING" || currentStatus === "PENDING";
+      !isLoading &&
+      (currentStatus === CallStatus.RUNNING ||
+        currentStatus === CallStatus.PENDING);
 
-    if (shouldPoll && !isLoading) {
-      pollIntervalRef.current = setInterval(() => {
-        fetchStatus(false);
-      }, STATUS_POLL_INTERVAL);
+    if (shouldPoll) {
+      pollIntervalRef.current = setInterval(pollForUpdates, STATUS_POLL_INTERVAL);
     }
 
     return () => {
@@ -213,7 +225,7 @@ const SingleCall = () => {
         pollIntervalRef.current = null;
       }
     };
-  }, [currentStatus, isLoading, fetchStatus]);
+  }, [currentStatus, isLoading, pollForUpdates]);
 
   /** Tab items */
   const tabItems = [
@@ -246,13 +258,59 @@ const SingleCall = () => {
     },
   ];
 
-  /** Tab content mapping */
-  const tabContent: Record<TabKey, JSX.Element> = {
-    speech_analysis: <SpeechAnalysis speechAnalysis={speechAnalysis} />,
-    summary_analysis: <SummaryAnalysis summaryAnalysis={summaryAnalysis} />,
-    recommendations: (
-      <Recommendations actionRecommendations={actionRecommendations} />
-    ),
+  /** Render tab content based on active tab */
+  const renderTabContent = () => {
+    if (!speechAnalysis) return null;
+
+    switch (activeTab) {
+      case "speech_analysis":
+        return (
+          <SpeechAnalysis
+            speechAnalysis={{
+              transcript: speechAnalysis.transcript,
+              intent_detection: speechAnalysis.intents.map((i) => ({
+                intent: i.intent,
+                confidence_score: i.confidence_score || 0,
+              })),
+              sentiment_analysis: {
+                customer_sentiment: speechAnalysis.customer_sentiment || "",
+                agent_sentiment: speechAnalysis.agent_sentiment || "",
+              },
+              entities_extracted: speechAnalysis.extracted_entities.map((e) => ({
+                entity_type: e.entity_type,
+                value: e.value,
+                confidence_score: e.confidence_score || 0,
+              })),
+              issues_identified: speechAnalysis.issues.map((i) => ({
+                issue_type: i.issue_type,
+                description: i.description,
+              })),
+            }}
+          />
+        );
+      case "summary_analysis":
+        return (
+          <SummaryAnalysis
+            summaryAnalysis={{
+              key_points: speechAnalysis.keypoints.map((k) => k.point),
+              overall_sentiment: speechAnalysis.overall_sentiment || "",
+              call_efficiency: speechAnalysis.call_efficiency || "",
+              resolution_status: speechAnalysis.resolution_status || "",
+            }}
+          />
+        );
+      case "recommendations":
+        return (
+          <Recommendations
+            actionRecommendations={speechAnalysis.actions.map((a) => ({
+              action_type: a.action_type,
+              details: a.details,
+            }))}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   if (isLoading) {
@@ -286,7 +344,7 @@ const SingleCall = () => {
           <ExclamationCircleOutlined className="error-icon" />
           <h3>Error Loading Call</h3>
           <p>{error}</p>
-          <Button type="primary" onClick={() => fetchStatus()}>
+          <Button type="primary" onClick={() => loadCallData()}>
             Try Again
           </Button>
         </Card>
@@ -315,7 +373,7 @@ const SingleCall = () => {
               icon={<DownloadOutlined />}
               onClick={handleDownloadAudioClick}
               loading={isDownloading}
-              disabled={!file_id}
+              disabled={!callData?.file_id}
             >
               Download
             </Button>
@@ -340,8 +398,8 @@ const SingleCall = () => {
               <span className="title-icon">🎧</span>
               Audio Recording
             </h3>
-            {file_id ? (
-              <AudioPlayer audioUrl={file_id} />
+            {callData?.file_id ? (
+              <AudioPlayer audioUrl={callData.file_id} />
             ) : (
               <div className="no-audio">
                 <p>Audio file not available</p>
@@ -373,7 +431,9 @@ const SingleCall = () => {
                 <div className="metadata-info">
                   <span className="metadata-label">Duration</span>
                   <span className="metadata-value">
-                    {formatDuration(call_duration)}
+                    {callData?.call_duration
+                      ? formatDuration(callData.call_duration)
+                      : "—"}
                   </span>
                 </div>
               </div>
@@ -385,11 +445,15 @@ const SingleCall = () => {
                 <div className="metadata-info">
                   <span className="metadata-label">Date</span>
                   <span className="metadata-value">
-                    {formatDateShort(created_at)}
+                    {callData?.created_at
+                      ? formatDateShort(callData.created_at)
+                      : "—"}
                   </span>
                 </div>
                 <span className="metadata-secondary">
-                  {formatTimeShort(created_at)}
+                  {callData?.created_at
+                    ? formatTimeShort(callData.created_at)
+                    : ""}
                 </span>
               </div>
 
@@ -400,8 +464,8 @@ const SingleCall = () => {
                 <div className="metadata-info">
                   <span className="metadata-label">Language</span>
                   <span className="metadata-value">
-                    {taskStatus?.result?.call_metadata?.language
-                      ? capitalize(taskStatus.result.call_metadata.language)
+                    {speechAnalysis?.language
+                      ? capitalize(speechAnalysis.language)
                       : "—"}
                   </span>
                 </div>
@@ -413,7 +477,7 @@ const SingleCall = () => {
         {/* Analysis Section - Full Width Below */}
         <Col span={24}>
           <Card className="analysis-card animate-fade-in delay-2">
-            {currentStatus === "SUCCESS" ? (
+            {currentStatus === CallStatus.SUCCESS && speechAnalysis ? (
               <>
                 <Tabs
                   activeKey={activeTab}
@@ -421,11 +485,12 @@ const SingleCall = () => {
                   onChange={onTabChange}
                   className="analysis-tabs"
                 />
-                <div className="tab-content">{tabContent[activeTab]}</div>
+                <div className="tab-content">{renderTabContent()}</div>
               </>
             ) : (
               <div className="processing-state">
-                {currentStatus === "RUNNING" || currentStatus === "PENDING" ? (
+                {currentStatus === CallStatus.RUNNING ||
+                currentStatus === CallStatus.PENDING ? (
                   <>
                     <div className="processing-animation">
                       <Spin
@@ -435,10 +500,7 @@ const SingleCall = () => {
                       />
                     </div>
                     <h3>Processing Your Call</h3>
-                    <p>
-                      {taskStatus?.result?.detail ||
-                        "AI is analyzing the conversation..."}
-                    </p>
+                    <p>AI is analyzing the conversation...</p>
                     <div className="processing-steps">
                       <div className="step active">
                         <span className="step-dot" />
@@ -458,10 +520,7 @@ const SingleCall = () => {
                   <>
                     <ExclamationCircleOutlined className="failed-icon" />
                     <h3>Processing Failed</h3>
-                    <p>
-                      {taskStatus?.result?.detail ||
-                        "An error occurred while processing the call."}
-                    </p>
+                    <p>An error occurred while processing the call.</p>
                     <Button type="primary" onClick={() => navigate("/calls")}>
                       Back to Calls
                     </Button>

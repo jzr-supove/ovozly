@@ -9,15 +9,21 @@ import apiClient from "./api";
 import {
   CallRecord,
   CallStatus,
+  CallWithAnalysis,
   SortField,
   SortOrder,
 } from "@/pages/calls/types/callsTypes";
 
-/** Task status response from API */
+/** Task status response from API (for polling during processing) */
 export interface TaskStatusResponse {
   status: string;
-  result: {
+  call_id?: number;
+  result?: {
     detail?: string;
+    call_id?: number;
+    status?: string;
+    analysis_id?: string;
+    // Legacy fields (from Celery result, before database persistence)
     call_metadata?: {
       language: string;
     };
@@ -33,15 +39,18 @@ export type UploadProgressCallback = (progress: number) => void;
 /** Fetch calls options */
 export interface FetchCallsOptions {
   status?: CallStatus;
+  sentiment?: string;
+  resolution?: string;
   sortBy?: SortField;
   sortOrder?: SortOrder;
 }
 
 /**
  * Fetch all calls for the current user with optional filtering and sorting.
+ * Returns calls with analysis summary for list views.
  *
  * @param options - Optional filtering and sorting parameters
- * @returns Promise resolving to array of call records
+ * @returns Promise resolving to array of call records with analysis summary
  */
 export const fetchCalls = async (
   options?: FetchCallsOptions
@@ -50,6 +59,12 @@ export const fetchCalls = async (
 
   if (options?.status) {
     params.append("status", options.status);
+  }
+  if (options?.sentiment) {
+    params.append("sentiment", options.sentiment);
+  }
+  if (options?.resolution) {
+    params.append("resolution", options.resolution);
   }
   if (options?.sortBy) {
     params.append("sort_by", options.sortBy);
@@ -62,6 +77,19 @@ export const fetchCalls = async (
   const url = queryString ? `/stt/calls?${queryString}` : "/stt/calls";
 
   const response = await apiClient.get<CallRecord[]>(url);
+  return response.data;
+};
+
+/**
+ * Fetch a single call with full analysis data.
+ *
+ * @param callId - Call ID (integer)
+ * @returns Promise resolving to call with full analysis
+ */
+export const fetchCallDetails = async (
+  callId: number | string
+): Promise<CallWithAnalysis> => {
+  const response = await apiClient.get<CallWithAnalysis>(`/stt/call/${callId}`);
   return response.data;
 };
 
@@ -101,6 +129,7 @@ export const uploadAudio = async (
 
 /**
  * Get the status of a processing task.
+ * Use this for polling during RUNNING/PENDING states.
  *
  * @param taskId - Celery task ID
  * @returns Promise resolving to task status
@@ -146,12 +175,32 @@ export const fetchCallStatuses = async (
 /**
  * Delete a call recording and its associated data.
  *
- * @param callId - UUID of the call to delete
+ * @param callId - ID of the call to delete (integer)
  * @returns Promise resolving to success message
  */
-export const deleteCall = async (callId: string): Promise<{ message: string }> => {
+export const deleteCall = async (
+  callId: number | string
+): Promise<{ message: string }> => {
   const response = await apiClient.delete<{ message: string }>(
     `/stt/call/${callId}`
   );
+  return response.data;
+};
+
+/**
+ * Fetch analytics summary for dashboard widgets.
+ *
+ * @returns Promise resolving to analytics summary
+ */
+export const fetchAnalyticsSummary = async (): Promise<{
+  total_calls: number;
+  total_analyzed: number;
+  average_duration_seconds: number;
+  sentiment_distribution: Record<string, number>;
+  resolution_distribution: Record<string, number>;
+  efficiency_distribution: Record<string, number>;
+  status_distribution: Record<string, number>;
+}> => {
+  const response = await apiClient.get("/stt/analytics/summary");
   return response.data;
 };

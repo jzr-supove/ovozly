@@ -106,11 +106,14 @@ const Calls = () => {
     if (pendingCalls.length === 0) return;
 
     try {
-      const taskIds = pendingCalls.map((call) => call.celery_task_id);
+      const taskIds = pendingCalls
+        .map((call) => call.celery_task_id)
+        .filter((id): id is string => id !== null);
       const statusMap = await fetchCallStatuses(taskIds);
 
       setCalls((prevCalls) =>
         prevCalls.map((call) => {
+          if (!call.celery_task_id) return call;
           const newStatus = statusMap.get(call.celery_task_id);
           if (newStatus && newStatus !== call.status) {
             return { ...call, status: newStatus };
@@ -288,12 +291,7 @@ const Calls = () => {
         if (isClickable) {
           return (
             <Link
-              to={`${record.celery_task_id}`}
-              state={{
-                created_at: record.created_at,
-                call_duration: record.call_duration,
-                file_id: record.file_id,
-              }}
+              to={`${record.id}`}
               className="file-name-cell clickable"
             >
               <SoundOutlined className="file-icon" />
