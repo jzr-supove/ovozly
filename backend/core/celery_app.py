@@ -7,7 +7,6 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 from celery import Celery
-from celery.signals import worker_process_init
 from loguru import logger
 
 from core.config import settings
@@ -31,19 +30,6 @@ celery.conf.update(
     broker_connection_retry_on_startup=True,
     result_expires=None,  # Never expire results
 )
-
-
-@worker_process_init.connect
-def init_ml_models(**kwargs):
-    # Only preload the local model if using local STT provider
-    if settings.STT_PROVIDER == "local":
-        from ai.loader import get_model, get_processor
-        logger.info("Preloading local Seamless M4T model...")
-        get_processor()
-        get_model()
-        logger.info("Local model loaded successfully")
-    else:
-        logger.info(f"Using {settings.STT_PROVIDER} STT provider - skipping local model preload")
 
 
 celery.autodiscover_tasks(["core"])

@@ -19,6 +19,7 @@ class Call(Base):
     Attributes:
         id: Primary key (auto-increment)
         file_id: Google Cloud Storage URL for the audio file
+        file_name: Original filename of the uploaded audio
         agent_id: Foreign key to the user who uploaded the call
         call_duration: Duration of the call in seconds
         status: Processing status (RUNNING, SUCCESS, FAIL)
@@ -30,6 +31,7 @@ class Call(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     file_id = Column(String, nullable=False)
+    file_name = Column(String, nullable=False)
     agent_id = Column(ForeignKey("users.id"), nullable=False)
     call_duration = Column(Double, nullable=False)
     status = Column(String, nullable=False)

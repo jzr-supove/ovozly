@@ -1,20 +1,18 @@
-import torch
-import torchaudio
-from loguru import logger
-from typing import Any
+"""
+Ovozly Backend - Audio Utilities
+
+Provides audio file manipulation utilities using pydub.
+"""
+
 from io import BytesIO
+from typing import List, Dict
+
+from loguru import logger
 from pydub import AudioSegment
 
-from core.config import settings
 
-
-def split_audio(audio: Any, max_length: int = 5) -> list:
-    sample_rate = 16000  # Target sample rate
-    max_samples = max_length * sample_rate  # Convert seconds to samples
-    return [audio[:, i : i + max_samples] for i in range(0, audio.size(1), max_samples)]
-
-
-def convert_mp3_to_wav(mp3_file: Any) -> BytesIO:
+def convert_mp3_to_wav(mp3_file: str) -> BytesIO:
+    """Convert an audio file to WAV format."""
     logger.debug(f"Trying to open {mp3_file}...")
     audio = AudioSegment.from_file(mp3_file, format=mp3_file.split(".")[-1])
     wav_bytes_io = BytesIO()
@@ -24,135 +22,21 @@ def convert_mp3_to_wav(mp3_file: Any) -> BytesIO:
     return wav_bytes_io
 
 
-def process_audio_chunk(chunk, *args) -> list:
+def split_audio_into_segments(
+    audio: BytesIO, audio_ext: str, diar_data: List[Dict], do_merge: bool = True
+) -> List[BytesIO]:
     """
-    Process a single chunk of audio to text (local model only).
-    """
-    from ai.loader import device, get_model, get_processor
-
-    audio_inputs = get_processor()(audios=chunk, return_tensors="pt", sampling_rate=16_000)
-    audio_inputs = {key: tensor.to(device) for key, tensor in audio_inputs.items()}
-
-    with torch.amp.autocast("cuda"):
-        output_tokens = get_model().generate(**audio_inputs, tgt_lang="uzn")
-
-    # Move tensors back to CPU and clear GPU memory
-    torch.cuda.empty_cache()
-
-    return output_tokens
-
-
-def audio_to_text(audio_file, max_length=10):
-    """
-    Convert audio to text, processing in chunks if necessary (local model only).
-    """
-    from ai.loader import get_processor
-
-    # Load and resample the audio
-    audio, orig_freq = torchaudio.load(audio_file)
-    audio = torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=16_000)
-
-    # Split audio into smaller chunks if it's too long
-    # audio_chunks = split_audio(audio, max_length=max_length)
-    audio_chunks = [audio]
-
-    text_results = []
-    for chunk in audio_chunks:
-        output_tokens = process_audio_chunk(chunk)
-
-        # Debugging token structure
-        logger.debug(f"Output Tokens: {output_tokens}")
-        logger.debug(f"Output Tokens Type: {type(output_tokens)}")
-        logger.debug(f"Output Tokens[0]: {output_tokens[0]}")
-        logger.debug(f"Output Tokens[0] Type: {type(output_tokens[0])}")
-
-        # Flatten token IDs if needed
-        if isinstance(output_tokens[0], torch.Tensor):
-            token_ids = output_tokens[0].tolist()  # Convert tensor to list
-
-        elif isinstance(output_tokens[0], list):
-            token_ids = output_tokens[0]  # Already a list
-
-        else:
-            raise TypeError(f"Unexpected type for output tokens: {type(output_tokens[0])}")
-
-        # Decode tokens to text
-        text_results.append(get_processor().decode(token_ids, skip_special_tokens=True))
-
-    # Combine results from all chunks
-    return " ".join(text_results)
-
-
-def audio_to_text_v2(audio_file: BytesIO) -> str:
-    """
-    Convert audio to text using the configured STT provider.
-
-    Uses either local Seamless M4T model or OpenAI Whisper API
-    based on the STT_PROVIDER setting.
+    Split audio into segments based on diarization data.
 
     Args:
-        audio_file: Audio data as BytesIO (WAV format)
+        audio: Audio file as BytesIO
+        audio_ext: Audio file extension (m4a, mp3, wav, etc.)
+        diar_data: Diarization data with speaker, start, end
+        do_merge: Whether to merge consecutive segments from same speaker
 
     Returns:
-        Transcribed text
+        List of audio segments as BytesIO
     """
-    if settings.STT_PROVIDER == "whisper":
-        return _transcribe_with_whisper(audio_file)
-    else:
-        return _transcribe_with_local_model(audio_file)
-
-
-def _transcribe_with_whisper(audio_file: BytesIO) -> str:
-    """
-    Transcribe audio using OpenAI Whisper API (fast, cloud-based).
-    """
-    from ai.whisper_api import transcribe_audio_whisper
-
-    audio_file.seek(0)
-    return transcribe_audio_whisper(audio_file)
-
-
-def _transcribe_with_local_model(audio_file: BytesIO) -> str:
-    """
-    Transcribe audio using local Seamless M4T model (slow, GPU-based).
-    """
-    from ai.loader import device, get_model, get_processor
-
-    audio, orig_freq = torchaudio.load(audio_file, format="wav", backend="soundfile")
-
-    audio = torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=16_000)
-
-    # generates silence to audios less than 1 sec
-    min_num_samples = 1000
-    if audio.shape[1] < min_num_samples:
-        padded = torch.zeros((1, min_num_samples), dtype=audio.dtype)
-        padded[0, : audio.shape[1]] = audio[0]
-        audio = padded
-        logger.debug(f"Audio shape after padding: {audio.shape}")
-
-    audio_inputs = get_processor()(audios=audio, return_tensors="pt", sampling_rate=16_000)
-
-    # Ensure GPU
-    audio_inputs = {key: tensor.to(device) for key, tensor in audio_inputs.items()}
-
-    with torch.amp.autocast("cuda"):
-        output_tokens = get_model().generate(**audio_inputs, tgt_lang="uzn")
-
-    if isinstance(output_tokens[0], torch.Tensor):
-        token_ids = output_tokens[0].tolist()
-
-    elif isinstance(output_tokens[0], list):
-        token_ids = output_tokens[0]
-
-    else:
-        raise TypeError(f"Unexpected type for output tokens: {type(output_tokens[0])}")
-
-    return get_processor().decode(token_ids, skip_special_tokens=True)
-
-
-def split_audio_into_segments(
-    audio: BytesIO, audio_ext: str, diar_data: dict, do_merge: bool = True
-) -> list:
     merged = []
     prev_speaker = ""
 
@@ -170,8 +54,8 @@ def split_audio_into_segments(
     logger.debug(f"Segments:\n{merged}")
 
     # Load the audio file
-    audio.seek(0)  # Make sure stream position is at the start
-    audio = AudioSegment.from_file(audio, format=audio_ext)
+    audio.seek(0)
+    audio_segment = AudioSegment.from_file(audio, format=audio_ext)
     segments = []
 
     # Loop through timestamps and export each segment
@@ -181,7 +65,7 @@ def split_audio_into_segments(
         end_ms = end * 1000
 
         # Extract the audio segment
-        segment = audio[start_ms:end_ms]
+        segment = audio_segment[start_ms:end_ms]
 
         # Save to BytesIO
         output = BytesIO()
@@ -194,7 +78,8 @@ def split_audio_into_segments(
     return segments
 
 
-def merge_diarization_and_text(diarization_data: list, text_data: list) -> list:
+def merge_diarization_and_text(diarization_data: List[Dict], text_data: List[str]) -> List[Dict]:
+    """Merge diarization segments with transcribed text."""
     merged = []
     for diar, txt in zip(diarization_data, text_data):
         diar_copy = diar.copy()
@@ -204,6 +89,7 @@ def merge_diarization_and_text(diarization_data: list, text_data: list) -> list:
 
 
 def get_audio_duration(audio: BytesIO, audio_format: str) -> float:
+    """Get the duration of an audio file in seconds."""
     audio.seek(0)
-    audio = AudioSegment.from_file(audio, format=audio_format)
-    return audio.duration_seconds
+    audio_segment = AudioSegment.from_file(audio, format=audio_format)
+    return audio_segment.duration_seconds

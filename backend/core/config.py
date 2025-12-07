@@ -31,24 +31,18 @@ class Settings(BaseSettings):
         JWT_KEY: Secret key for JWT token signing
         DEBUG: Enable debug mode and verbose logging
         BUCKET_NAME: Google Cloud Storage bucket name
-        MODEL_NAME: HuggingFace model identifier for STT
         PYANNOTEAI_TOKEN: API token for PyAnnote AI diarization
         OPENAI_API_KEY: OpenAI API key for conversation analysis
         AISHA_API_KEY: AISHA STT service API key
-        STT_PROVIDER: Speech-to-text provider ("local" or "whisper")
     """
     DATABASE_URL: str
     REDIS_URL: str
     JWT_KEY: str
     DEBUG: bool
     BUCKET_NAME: str = "ovozly_bucket"
-    MODEL_NAME: str = "facebook/seamless-m4t-v2-large"
     PYANNOTEAI_TOKEN: str
     OPENAI_API_KEY: str
     AISHA_API_KEY: str
-
-    # STT Provider: "local" for Seamless M4T, "whisper" for OpenAI Whisper API
-    STT_PROVIDER: str = "whisper"
 
     @field_validator("DEBUG", mode="before")
     def validate_debug(cls, value):
