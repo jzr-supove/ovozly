@@ -1,7 +1,62 @@
-.demo-logo {
-  a {
-    text-decoration: none;
-    color: inherit;
-    font-weight: 500;
+.app-header {
+  .demo-logo {
+    a {
+      text-decoration: none;
+      color: #ffffff;
+      font-weight: 600;
+    }
+  }
+
+  .header-menu {
+    background: transparent !important;
+    border-bottom: none !important;
+
+    .ant-menu-item {
+      color: rgba(255, 255, 255, 0.75) !important;
+      background: transparent !important;
+
+      &:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+      }
+
+      &::after {
+        display: none !important;
+      }
+    }
+
+    .ant-menu-item-selected {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+
+      &::after {
+        display: none !important;
+      }
+    }
+
+    // Remove any underline/border effects
+    &.ant-menu-horizontal {
+      border-bottom: none !important;
+      line-height: 62px;
+
+      > .ant-menu-item,
+      > .ant-menu-submenu {
+        &::after {
+          display: none !important;
+          border: none !important;
+        }
+      }
+    }
+  }
+
+  .ant-space {
+    .anticon {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 18px;
+
+      &:hover {
+        color: #ffffff;
+      }
+    }
   }
 }

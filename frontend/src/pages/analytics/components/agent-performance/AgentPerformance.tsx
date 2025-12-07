@@ -8,7 +8,7 @@ const AgentPerformance = () => {
   const options: ApexCharts.ApexOptions = {
     chart: {
       type: "line",
-      height: 450,
+      height: 380,
       toolbar: {
         show: false,
       },
@@ -110,7 +110,7 @@ const AgentPerformance = () => {
         options={options}
         series={series}
         type="bar"
-        height={450}
+        height={380}
       />
     </Card>
   );

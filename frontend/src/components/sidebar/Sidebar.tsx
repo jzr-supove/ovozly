@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Layout, Menu, theme } from "antd";
+import { Button, Layout, Menu } from "antd";
 import type { MenuProps } from "antd";
 
 import {
@@ -13,6 +13,10 @@ import {
   SettingOutlined,
   OrderedListOutlined,
   VerticalAlignTopOutlined,
+  TeamOutlined,
+  SafetyOutlined,
+  RocketOutlined,
+  SmileOutlined,
 } from "@ant-design/icons";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 
@@ -36,6 +40,33 @@ const items: MenuItem[] = [
         key: "calls",
         label: "Calls List",
         icon: <OrderedListOutlined />,
+      },
+      {
+        key: "agents",
+        label: "Agents",
+        icon: <TeamOutlined />,
+      },
+      {
+        key: "satisfaction",
+        label: "Satisfaction",
+        icon: <SmileOutlined />,
+      },
+    ],
+  },
+  {
+    key: "intelligence",
+    label: "INTELLIGENCE",
+    type: "group",
+    children: [
+      {
+        key: "compliance",
+        label: "Compliance",
+        icon: <SafetyOutlined />,
+      },
+      {
+        key: "marketing",
+        label: "Marketing",
+        icon: <RocketOutlined />,
       },
     ],
   },
@@ -84,10 +115,6 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
   const [collapsed, setCollapsed] = useState(false);
 
   const toggleCollapsed = () => {
@@ -100,11 +127,12 @@ const Sidebar = () => {
   return (
     <Sider
       width={200}
-      style={{ background: colorBgContainer }}
+      style={{ background: "#f5f5f5" }}
       collapsible
       trigger={null}
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
+      className="sidebar"
     >
       <Button
         onClick={toggleCollapsed}

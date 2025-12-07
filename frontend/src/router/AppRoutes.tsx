@@ -19,6 +19,10 @@ import PostProcessing from "@/pages/postProcessing/PostProcessing";
 import Integration from "@/pages/integration/Integration";
 import Configuration from "@/pages/configuration/Configuration";
 import UsersAccounts from "@/pages/usersAccounts/UsersAccounts";
+import Agents from "@/pages/agents/Agents";
+import Compliance from "@/pages/compliance/Compliance";
+import Marketing from "@/pages/marketing/Marketing";
+import Satisfaction from "@/pages/satisfaction/Satisfaction";
 
 /**
  * Main application router component.
@@ -30,6 +34,10 @@ import UsersAccounts from "@/pages/usersAccounts/UsersAccounts";
  *   - /analytics - Analytics dashboard (default)
  *   - /calls - Call list
  *   - /calls/:callId - Single call details
+ *   - /agents - Agent performance dashboard
+ *   - /compliance - Policy violations & compliance
+ *   - /marketing - Marketing insights & trends
+ *   - /satisfaction - Customer satisfaction metrics
  *   - /applications/evaluations - Evaluations dashboard
  *   - /applications/post-processing - Post Processing dashboard
  *   - /administration/integration - Integration management
@@ -50,6 +58,10 @@ const AppRoutes = () => {
           <Route element={<Analytics />} path="analytics" />
           <Route element={<Calls />} path="calls" />
           <Route element={<SingleCall />} path="calls/:callId" />
+          <Route element={<Agents />} path="agents" />
+          <Route element={<Compliance />} path="compliance" />
+          <Route element={<Marketing />} path="marketing" />
+          <Route element={<Satisfaction />} path="satisfaction" />
           {/* Applications */}
           <Route element={<Evaluations />} path="applications/evaluations" />
           <Route element={<PostProcessing />} path="applications/post-processing" />

@@ -1,11 +1,11 @@
-import { Layout, Menu, MenuProps, Space, theme } from "antd";
+import { Layout, Menu, MenuProps, Space } from "antd";
 
 import { Notifications } from "../notifications/Notifications";
 import UserAvatar from "../userAvatar/UserAvatar";
 import Questions from "../questions/Questions";
 
 import "./header.scss";
-import logo from "@/assets/logo_2.png";
+import logo from "@/assets/logo_2_white.png";
 
 const { Header } = Layout;
 
@@ -18,13 +18,11 @@ const items: MenuProps["items"] = [
 ];
 
 const AppHeader = () => {
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
   return (
     <Header
+      className="app-header"
       style={{
-        background: colorBgContainer,
+        background: "#1a1a1a",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -50,6 +48,7 @@ const AppHeader = () => {
         defaultSelectedKeys={["performance"]}
         items={items}
         style={{ flex: 1, minWidth: 0 }}
+        className="header-menu"
       />
       <Space wrap size={23}>
         <Notifications />

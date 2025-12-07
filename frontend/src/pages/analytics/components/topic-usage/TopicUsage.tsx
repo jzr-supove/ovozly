@@ -8,7 +8,7 @@ const TopicUsage = () => {
   const options: ApexCharts.ApexOptions = {
     chart: {
       type: "bar",
-      height: 450,
+      height: 380,
       toolbar: {
         show: false,
       },
@@ -97,7 +97,7 @@ const TopicUsage = () => {
         options={options}
         series={series}
         type="bar"
-        height={450}
+        height={400}
       />
     </Card>
   );

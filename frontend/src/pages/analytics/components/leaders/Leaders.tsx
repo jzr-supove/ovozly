@@ -1,8 +1,5 @@
-import { Card, Col, Flex, Row } from "antd";
+import { Card, Col, Row } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
-
-import ReactApexChart from "react-apexcharts";
-import ApexCharts from "apexcharts";
 
 interface Agent {
   name: string;
@@ -10,28 +7,36 @@ interface Agent {
 }
 
 const agents: Agent[] = [
-  { name: "Veronica B.", performance: 40 },
-  { name: "Amirah N.", performance: 85 },
+  // Top performers
   { name: "Rodrigo G.", performance: 95 },
-  { name: "Veronica B.", performance: 40 },
+  { name: "Sarah M.", performance: 94 },
+  { name: "Emma T.", performance: 92 },
+  { name: "James L.", performance: 91 },
+  // Average performers
   { name: "Amirah N.", performance: 85 },
-  { name: "Rodrigo G.", performance: 95 },
-  { name: "Veronica B.", performance: 40 },
-  { name: "Amirah N.", performance: 85 },
-  { name: "Rodrigo G.", performance: 95 },
-  { name: "Veronica B.", performance: 40 },
-  { name: "Amirah N.", performance: 85 },
+  { name: "Michael K.", performance: 82 },
+  { name: "Diana P.", performance: 78 },
+  { name: "Kevin R.", performance: 75 },
+  // Laggers
+  { name: "Veronica B.", performance: 65 },
+  { name: "Tom H.", performance: 58 },
+  { name: "Lisa W.", performance: 52 },
 ];
-const style = {
-  background: "#0092ff",
-};
 
 const Leaders = () => {
-  const getPerformanceClass = (performance: number) => {
-    if (performance < 80) return "low-performance";
-    if (performance < 90) return "mid-performance";
-    return "high-performance";
+  const getPerformanceStyle = (performance: number) => {
+    if (performance >= 90) {
+      // Top performers - soft green
+      return { background: "#4ade80" };
+    } else if (performance >= 70) {
+      // Average performers - soft yellow/amber
+      return { background: "#fbbf24" };
+    } else {
+      // Laggers - soft coral/red
+      return { background: "#f87171" };
+    }
   };
+
   return (
     <Card
       title="Leaders & Laggers"
@@ -52,17 +57,17 @@ const Leaders = () => {
             <Col span={24} key={agent.name + i}>
               <Row gutter={[8, 8]}>
                 <Col span={8}>
-                  <div style={style} className="heatmap-item">
+                  <div style={getPerformanceStyle(agent.performance)} className="heatmap-item">
                     {agent.name}
                   </div>
                 </Col>
                 <Col span={8}>
-                  <div style={style} className="heatmap-item">
+                  <div style={getPerformanceStyle(agent.performance)} className="heatmap-item">
                     {agent.name}
                   </div>
                 </Col>
                 <Col span={8}>
-                  <div style={style} className="heatmap-item">
+                  <div style={getPerformanceStyle(agent.performance)} className="heatmap-item">
                     {agent.name}
                   </div>
                 </Col>
