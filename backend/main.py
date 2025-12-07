@@ -26,6 +26,17 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+
+# Add Private Network Access support
+@app.middleware("http")
+async def add_private_network_access_header(request, call_next):
+    """Add Access-Control-Allow-Private-Network header for CORS preflight requests"""
+    response = await call_next(request)
+    if request.method == "OPTIONS":
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
+    return response
 app.include_router(stt.router)
 app.include_router(users.router)
