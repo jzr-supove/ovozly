@@ -9,6 +9,8 @@ const TopicUsage = () => {
     chart: {
       type: "bar",
       height: 380,
+      width: "100%",
+      redrawOnParentResize: true,
       toolbar: {
         show: false,
       },
