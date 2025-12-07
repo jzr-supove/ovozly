@@ -1,14 +1,15 @@
 /**
  * Filter Component
  *
- * Provides status filtering and audio upload functionality for the calls list.
+ * Provides status filtering and audio upload functionality with progress tracking.
  */
 
 import { Col, Row, Select, Button, message } from "antd";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { SelectProps } from "antd/es/select";
+import { UploadOutlined } from "@ant-design/icons";
 
-import { CallStatus } from "../../types/callsTypes";
+import { CallRecord, CallStatus } from "../../types/callsTypes";
 import { uploadAudio } from "@/services/calls.service";
 import { getErrorMessage } from "@/services/api";
 import { capitalize } from "@/utils/helpers";
@@ -23,21 +24,35 @@ const statusOptions: SelectProps["options"] = Object.values(CallStatus).map(
 
 /** Component props */
 interface FilterProps {
-  /** Callback fired after successful audio upload */
-  onUploadSuccess?: () => void;
+  /** Called when upload starts with filename and temp ID */
+  onUploadStart?: (fileName: string, tempId: string) => void;
+  /** Called with upload progress (0-100) */
+  onUploadProgress?: (tempId: string, progress: number) => void;
+  /** Called when upload completes successfully */
+  onUploadComplete?: (tempId: string, call: CallRecord) => void;
+  /** Called when upload fails */
+  onUploadError?: (tempId: string) => void;
+  /** Called when status filter changes */
+  onStatusFilterChange?: (status: CallStatus | undefined) => void;
+  /** Current status filter value */
+  statusFilter?: CallStatus;
 }
 
-const Filter: React.FC<FilterProps> = ({ onUploadSuccess }) => {
-  const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [selectedStatus, setSelectedStatus] = useState<CallStatus | undefined>();
+const Filter: React.FC<FilterProps> = ({
+  onUploadStart,
+  onUploadProgress,
+  onUploadComplete,
+  onUploadError,
+  onStatusFilterChange,
+  statusFilter,
+}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   /**
    * Handle status filter change.
    */
   const handleStatusChange = (value: CallStatus | undefined) => {
-    setSelectedStatus(value);
-    // TODO: Implement filtering logic when backend supports it
+    onStatusFilterChange?.(value);
   };
 
   /**
@@ -48,7 +63,7 @@ const Filter: React.FC<FilterProps> = ({ onUploadSuccess }) => {
   };
 
   /**
-   * Handle file selection and upload.
+   * Handle file selection and upload with progress tracking.
    */
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -56,44 +71,54 @@ const Filter: React.FC<FilterProps> = ({ onUploadSuccess }) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Generate temporary ID for tracking
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Notify parent that upload is starting
+    onUploadStart?.(file.name, tempId);
+
     try {
-      setIsUploading(true);
-      await uploadAudio(file);
-      message.success("Audio uploaded successfully");
-      onUploadSuccess?.();
+      // Upload with progress tracking
+      const call = await uploadAudio(file, (progress) => {
+        onUploadProgress?.(tempId, progress);
+      });
+
+      // Success - replace temp entry with real data
+      onUploadComplete?.(tempId, call);
+      message.success(`"${file.name}" uploaded successfully`);
     } catch (error) {
+      // Remove temp entry on error
+      onUploadError?.(tempId);
       message.error(getErrorMessage(error));
     } finally {
-      setIsUploading(false);
+      // Reset file input
       event.target.value = "";
     }
   };
 
   return (
-    <Row className="justify-content-end" gutter={8}>
-      <Col
-        span={7}
-        className="d-flex justify-content-end align-items-center me-2"
-      >
+    <Row className="justify-content-end" gutter={12}>
+      <Col className="d-flex justify-content-end align-items-center">
         <Select
-          placeholder="Status"
+          placeholder="Filter by status"
           allowClear
           options={statusOptions}
-          style={{ width: 200 }}
-          value={selectedStatus}
+          style={{ width: 160 }}
+          value={statusFilter}
           onChange={(value) =>
             handleStatusChange(value as CallStatus | undefined)
           }
         />
       </Col>
 
-      <Col span={6} className="text-end">
+      <Col className="text-end">
         <Button
           type="primary"
+          icon={<UploadOutlined />}
           onClick={handleAddConversationClick}
-          loading={isUploading}
+          className="upload-btn"
         >
-          Add conversation
+          Upload Recording
         </Button>
         <input
           ref={fileInputRef}

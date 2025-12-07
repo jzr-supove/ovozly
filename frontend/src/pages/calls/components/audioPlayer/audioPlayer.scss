@@ -1,0 +1,311 @@
+// Audio Player Styles
+
+.audio-player {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+
+  &.loading {
+    .waveform-container {
+      opacity: 0.6;
+    }
+  }
+
+  // Waveform section
+  .waveform-container {
+    position: relative;
+    min-height: 80px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.5);
+
+    .waveform {
+      transition: opacity 0.3s ease;
+      width: 100%;
+
+      &.hidden {
+        opacity: 0;
+        position: absolute;
+      }
+    }
+
+    .waveform-skeleton {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .skeleton-bars {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        height: 100%;
+        width: 100%;
+        padding: 0 8px;
+
+        .skeleton-bar {
+          flex: 1;
+          max-width: 4px;
+          background: linear-gradient(
+            180deg,
+            #e2e8f0 0%,
+            #cbd5e1 50%,
+            #e2e8f0 100%
+          );
+          border-radius: 2px;
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+      }
+    }
+
+    // Fallback progress bar (when wavesurfer fails)
+    .fallback-progress-bar {
+      position: relative;
+      width: 100%;
+      height: 80px;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+
+      .fallback-progress-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: rgba(27, 132, 255, 0.15);
+        transition: width 0.1s linear;
+        z-index: 1;
+      }
+
+      .fallback-waveform {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        height: 100%;
+        padding: 0 8px;
+        z-index: 2;
+
+        .fallback-bar {
+          flex: 1;
+          max-width: 4px;
+          background: #c4cad6;
+          border-radius: 2px;
+          transition: background 0.2s ease;
+        }
+      }
+
+      &:hover .fallback-waveform .fallback-bar {
+        background: #9ca3af;
+      }
+    }
+  }
+
+  // Progress section
+  .progress-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .time-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #64748b;
+      min-width: 45px;
+      font-variant-numeric: tabular-nums;
+
+      &:first-child {
+        text-align: right;
+      }
+
+      &:last-child {
+        text-align: left;
+      }
+    }
+
+    .progress-slider {
+      flex: 1;
+
+      .ant-slider-rail {
+        background: #e2e8f0;
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      .ant-slider-track {
+        background: linear-gradient(90deg, #1b84ff 0%, #3b9bff 100%);
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      .ant-slider-handle {
+        width: 16px;
+        height: 16px;
+        border: 3px solid #1b84ff;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(27, 132, 255, 0.3);
+        transition: all 0.2s ease;
+
+        &::after {
+          display: none;
+        }
+
+        &:hover,
+        &:focus {
+          border-color: #3b9bff;
+          box-shadow: 0 4px 12px rgba(27, 132, 255, 0.4);
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+
+  // Controls section
+  .controls-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .playback-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .control-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+
+        .anticon {
+          font-size: 18px;
+          color: #64748b;
+        }
+
+        &:hover:not(:disabled) {
+          background: rgba(27, 132, 255, 0.1);
+
+          .anticon {
+            color: #1b84ff;
+          }
+        }
+
+        &:disabled {
+          opacity: 0.5;
+        }
+      }
+
+      .play-btn {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #1b84ff 0%, #0066cc 100%);
+        border: none;
+        box-shadow: 0 4px 16px rgba(27, 132, 255, 0.35);
+        transition: all 0.2s ease;
+
+        .anticon {
+          font-size: 28px;
+        }
+
+        &:hover:not(:disabled) {
+          transform: scale(1.05);
+          box-shadow: 0 6px 20px rgba(27, 132, 255, 0.45);
+        }
+
+        &:active:not(:disabled) {
+          transform: scale(0.98);
+        }
+
+        &:disabled {
+          background: #94a3b8;
+          box-shadow: none;
+        }
+      }
+    }
+
+    .volume-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 140px;
+
+      .volume-icon {
+        font-size: 16px;
+        color: #64748b;
+      }
+
+      .volume-slider {
+        flex: 1;
+
+        .ant-slider-rail {
+          background: #e2e8f0;
+          height: 4px;
+        }
+
+        .ant-slider-track {
+          background: #1b84ff;
+          height: 4px;
+        }
+
+        .ant-slider-handle {
+          width: 12px;
+          height: 12px;
+          border: 2px solid #1b84ff;
+          background: #fff;
+
+          &::after {
+            display: none;
+          }
+
+          &:hover,
+          &:focus {
+            border-color: #3b9bff;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Pulse animation for skeleton
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scaleY(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 576px) {
+  .audio-player {
+    padding: 16px;
+
+    .controls-container {
+      flex-direction: column;
+      gap: 16px;
+
+      .volume-controls {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

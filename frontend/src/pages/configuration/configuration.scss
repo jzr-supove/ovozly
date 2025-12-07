@@ -1,0 +1,176 @@
+.configuration-page {
+  .config-card {
+    border-radius: 16px;
+    min-height: calc(100vh - 180px);
+
+    .ant-card-body {
+      padding: 24px 32px;
+    }
+  }
+
+  .config-header {
+    margin-bottom: 8px;
+  }
+
+  .config-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bs-gray-700);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .config-subtitle {
+    color: #8c8c8c;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .config-tabs {
+    .ant-tabs-nav {
+      width: 220px;
+
+      .ant-tabs-tab {
+        padding: 12px 16px;
+        margin: 4px 0 !important;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #fafafa;
+        }
+
+        &.ant-tabs-tab-active {
+          background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+
+          .ant-tabs-tab-btn {
+            color: #1890ff;
+          }
+        }
+      }
+
+      .ant-tabs-tab-btn {
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .ant-tabs-ink-bar {
+        display: none;
+      }
+    }
+
+    .ant-tabs-content-holder {
+      border-left: 1px dashed #f0f0f0;
+      padding-left: 32px;
+      margin-left: 16px;
+    }
+  }
+
+  .settings-panel {
+    max-width: 800px;
+  }
+
+  .settings-group {
+    margin-bottom: 24px;
+
+    &__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--bs-gray-700);
+      margin: 0 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .anticon {
+        color: #1890ff;
+      }
+    }
+  }
+
+  .settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px dashed #f5f5f5;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &__info {
+      flex: 1;
+      padding-right: 24px;
+    }
+
+    &__label {
+      font-weight: 600;
+      color: var(--bs-gray-700);
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    &__desc {
+      font-size: 12px;
+      color: #8c8c8c;
+      line-height: 1.5;
+    }
+
+    .ant-input,
+    .ant-select,
+    .ant-input-number {
+      border-radius: 8px;
+    }
+
+    .ant-slider {
+      margin-top: 8px;
+    }
+
+    .ant-radio-group {
+      .ant-radio-button-wrapper {
+        border-radius: 0;
+
+        &:first-child {
+          border-radius: 8px 0 0 8px;
+        }
+
+        &:last-child {
+          border-radius: 0 8px 8px 0;
+        }
+      }
+    }
+
+    .ant-switch {
+      margin-top: 4px;
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 1200px) {
+    .config-tabs {
+      .ant-tabs-nav {
+        width: 180px;
+      }
+
+      .ant-tabs-content-holder {
+        padding-left: 24px;
+      }
+    }
+
+    .settings-item {
+      flex-direction: column;
+      gap: 12px;
+
+      &__info {
+        padding-right: 0;
+      }
+    }
+  }
+}

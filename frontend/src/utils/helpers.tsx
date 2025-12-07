@@ -24,6 +24,40 @@ export const formatCreatedAt = (dateString: string | undefined): string => {
 };
 
 /**
+ * Format a date string to a shorter format.
+ *
+ * @param dateString - ISO date string or Date-parseable string
+ * @returns Formatted date string (e.g., "Dec 7, 2025")
+ */
+export const formatDateShort = (dateString: string | undefined): string => {
+  if (!dateString) return "—";
+
+  try {
+    const date = new Date(dateString);
+    return format(date, "MMM d, yyyy");
+  } catch {
+    return "—";
+  }
+};
+
+/**
+ * Format a date string to time only.
+ *
+ * @param dateString - ISO date string or Date-parseable string
+ * @returns Formatted time string (e.g., "1:40 AM")
+ */
+export const formatTimeShort = (dateString: string | undefined): string => {
+  if (!dateString) return "—";
+
+  try {
+    const date = new Date(dateString);
+    return format(date, "h:mm a");
+  } catch {
+    return "—";
+  }
+};
+
+/**
  * Format duration in seconds to a human-readable format.
  *
  * @param seconds - Duration in seconds

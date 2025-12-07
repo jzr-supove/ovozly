@@ -31,6 +31,8 @@ export enum CallType {
 export interface CallRecord {
   /** URL or identifier for the audio file */
   file_id: string;
+  /** Original filename of the audio file */
+  file_name: string;
   /** Unique call identifier */
   id: string;
   /** Agent who handled the call */
@@ -43,4 +45,14 @@ export interface CallRecord {
   status: CallStatus;
   /** Celery task ID for async processing */
   celery_task_id: string;
+  /** Whether this is a local upload in progress (frontend only) */
+  isUploading?: boolean;
+  /** Upload progress percentage (frontend only) */
+  uploadProgress?: number;
 }
+
+/** Sort field options */
+export type SortField = "created_at" | "call_duration" | "file_name";
+
+/** Sort order options */
+export type SortOrder = "asc" | "desc";

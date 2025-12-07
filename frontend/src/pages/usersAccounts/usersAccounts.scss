@@ -1,0 +1,220 @@
+.users-accounts-page {
+  .stat-card {
+    border-radius: 16px;
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    &__icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+
+      &--users {
+        background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+        color: #1890ff;
+      }
+
+      &--active {
+        background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+        color: #52c41a;
+      }
+
+      &--pending {
+        background: linear-gradient(135deg, #fffbe6 0%, #fff1b8 100%);
+        color: #faad14;
+      }
+
+      &--teams {
+        background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%);
+        color: #722ed1;
+      }
+    }
+
+    &__label {
+      font-size: 13px;
+      color: #8c8c8c;
+      margin-bottom: 4px;
+    }
+
+    &__value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--bs-gray-700);
+
+      &--success {
+        color: #52c41a;
+      }
+
+      &--warning {
+        color: #faad14;
+      }
+    }
+
+    &__trend {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #8c8c8c;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &--success {
+        color: #52c41a;
+      }
+
+      &--warning {
+        color: #faad14;
+      }
+    }
+  }
+
+  .chart-card {
+    height: 100%;
+    border-radius: 16px;
+
+    .ant-card-head {
+      border-bottom: 1px dashed #f0f0f0;
+    }
+
+    .ant-card-head-title {
+      font-weight: 600;
+      color: var(--bs-gray-700);
+    }
+  }
+
+  .users-card {
+    border-radius: 16px;
+
+    .ant-card-head {
+      border-bottom: 1px dashed #f0f0f0;
+    }
+
+    .ant-card-head-title {
+      font-weight: 600;
+      color: var(--bs-gray-700);
+    }
+  }
+
+  .users-table {
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      font-weight: 600;
+      color: var(--bs-gray-600);
+      border-bottom: 1px dashed #f0f0f0;
+    }
+
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px dashed #f0f0f0;
+      padding: 14px 16px;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: #fafafa;
+    }
+  }
+
+  .user-name {
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    margin-bottom: 2px;
+  }
+
+  .user-email {
+    font-size: 12px;
+    color: #8c8c8c;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .role-tag {
+    font-weight: 500;
+    padding: 2px 10px;
+    border-radius: 6px;
+  }
+
+  .team-card {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    height: 100%;
+
+    &:hover {
+      border-color: #d9d9d9;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    &__name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--bs-gray-700);
+      margin-bottom: 4px;
+    }
+
+    &__lead {
+      font-size: 12px;
+      color: #8c8c8c;
+    }
+
+    &__stats {
+      margin-top: 20px;
+      padding: 16px 0;
+      border-top: 1px dashed #f0f0f0;
+      border-bottom: 1px dashed #f0f0f0;
+    }
+
+    &__stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--bs-gray-700);
+    }
+
+    &__stat-label {
+      font-size: 12px;
+      color: #8c8c8c;
+    }
+
+    &__performance {
+      margin-top: 16px;
+    }
+  }
+
+  .text-capitalize {
+    text-transform: capitalize;
+  }
+
+  .text-success {
+    color: #52c41a !important;
+  }
+
+  .text-muted {
+    color: #8c8c8c !important;
+  }
+
+  .small {
+    font-size: 12px;
+  }
+
+  .fw-semibold {
+    font-weight: 600;
+  }
+
+  .mb-1 {
+    margin-bottom: 4px !important;
+  }
+
+  .mt-3 {
+    margin-top: 12px !important;
+  }
+}

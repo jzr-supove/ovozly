@@ -1,0 +1,226 @@
+.integration-page {
+  .stat-card {
+    border-radius: 16px;
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    &__icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+      color: #1890ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+
+      &--error {
+        background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
+        color: #ff4d4f;
+      }
+
+      &--data {
+        background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%);
+        color: #722ed1;
+      }
+
+      &--uptime {
+        background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+        color: #52c41a;
+      }
+    }
+
+    &__label {
+      font-size: 13px;
+      color: #8c8c8c;
+      margin-bottom: 4px;
+    }
+
+    &__value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1890ff;
+
+      &--error {
+        color: #ff4d4f;
+      }
+
+      &--uptime {
+        color: #52c41a;
+      }
+    }
+
+    &__total {
+      font-size: 16px;
+      color: #8c8c8c;
+      font-weight: 400;
+    }
+  }
+
+  .chart-card {
+    height: 100%;
+    border-radius: 16px;
+
+    .ant-card-head {
+      border-bottom: 1px dashed #f0f0f0;
+    }
+
+    .ant-card-head-title {
+      font-weight: 600;
+      color: var(--bs-gray-700);
+    }
+  }
+
+  .integrations-card {
+    border-radius: 16px;
+
+    .ant-card-head {
+      border-bottom: 1px dashed #f0f0f0;
+    }
+
+    .ant-card-head-title {
+      font-weight: 600;
+      color: var(--bs-gray-700);
+    }
+  }
+
+  .integration-item {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #52c41a;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover {
+      border-color: #d9d9d9;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &--connected::before {
+      background: #52c41a;
+    }
+
+    &--error::before {
+      background: #ff4d4f;
+      opacity: 1;
+    }
+
+    &--syncing::before {
+      background: #1890ff;
+      opacity: 1;
+    }
+
+    &--disconnected::before {
+      background: #8c8c8c;
+    }
+
+    &__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+
+      &--crm {
+        background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+        color: #1890ff;
+      }
+
+      &--communication {
+        background: linear-gradient(135deg, #fff0f6 0%, #ffd6e7 100%);
+        color: #eb2f96;
+      }
+
+      &--storage {
+        background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%);
+        color: #fa8c16;
+      }
+
+      &--analytics {
+        background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%);
+        color: #722ed1;
+      }
+
+      &--telephony {
+        background: linear-gradient(135deg, #e6fffb 0%, #b5f5ec 100%);
+        color: #13c2c2;
+      }
+    }
+
+    &__name {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--bs-gray-700);
+      margin-bottom: 4px;
+    }
+
+    &__category {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    &__health {
+      margin-top: 8px;
+    }
+  }
+
+  .text-muted {
+    color: #8c8c8c !important;
+  }
+
+  .small {
+    font-size: 12px;
+  }
+
+  .fw-semibold {
+    font-weight: 600;
+  }
+
+  .my-3 {
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .mb-1 {
+    margin-bottom: 4px !important;
+  }
+
+  .mb-2 {
+    margin-bottom: 8px !important;
+  }
+
+  .mb-3 {
+    margin-bottom: 12px !important;
+  }
+
+  .mt-3 {
+    margin-top: 12px !important;
+  }
+}

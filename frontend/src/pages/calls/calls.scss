@@ -1,3 +1,25 @@
+// Calls Page Styles
+
+.calls-card {
+  .calls-header {
+    margin-bottom: 1.5rem;
+
+    .calls-title {
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    .calls-count {
+      color: #99a1b7;
+      font-size: 0.875rem;
+    }
+  }
+
+  .upload-btn {
+    font-weight: 500;
+  }
+}
+
 .calls-table {
   .ant-table-thead {
     tr th {
@@ -5,44 +27,240 @@
       background: none;
       color: #99a1b7;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+
       &::before {
         content: none !important;
       }
+
+      // Sortable header styles
+      .sortable-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: #3f4254;
+        }
+
+        &.active {
+          color: #1b84ff;
+        }
+
+        .sort-icons {
+          display: flex;
+          flex-direction: column;
+          font-size: 0.6rem;
+          line-height: 0.5;
+          gap: 0;
+
+          .anticon {
+            color: #d1d5db;
+            transition: color 0.2s ease;
+
+            &.active {
+              color: #1b84ff;
+            }
+          }
+        }
+      }
     }
   }
+
   .ant-table-tbody {
-    tr td {
-      border-bottom: 1px dashed #f1f1f4;
+    tr {
+      transition: background-color 0.2s ease;
+
+      td {
+        border-bottom: 1px dashed #f1f1f4;
+        padding: 14px 16px;
+        vertical-align: middle;
+      }
+
+      &:hover {
+        td {
+          background-color: #fafbfc;
+        }
+      }
+
+      &.uploading-row {
+        background-color: #f0f7ff;
+
+        td {
+          background-color: #f0f7ff;
+        }
+
+        &:hover td {
+          background-color: #e6f0fa;
+        }
+      }
     }
   }
-  .view-call {
-    background-color: var(--bs-light);
-    width: 30px;
-    height: 30px;
+
+  // File name cell styles
+  .file-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .file-icon {
+      font-size: 1.1rem;
+      color: #7c8db5;
+      flex-shrink: 0;
+    }
+
+    .file-name {
+      font-weight: 500;
+      color: #3f4254;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &.clickable {
+      cursor: pointer;
+      text-decoration: none;
+
+      .file-name {
+        color: #1b84ff;
+      }
+
+      &:hover {
+        .file-name {
+          text-decoration: underline;
+        }
+
+        .file-icon {
+          color: #1b84ff;
+        }
+      }
+    }
+
+    &.disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+
+      .file-name {
+        color: #99a1b7;
+      }
+    }
+
+    &.uploading {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+
+      .upload-progress {
+        width: 100%;
+        max-width: 200px;
+
+        .ant-progress-inner {
+          background-color: #e9f3ff;
+        }
+
+        .ant-progress-bg {
+          background-color: #1b84ff;
+        }
+      }
+
+      > div:first-child {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+    }
   }
-  .ant-tag {
+
+  // Status tag styles
+  .status-tag {
     border: none;
     display: inline-flex;
     align-items: center;
+    gap: 6px;
     font-weight: 600;
-    text-transform: lowercase !important;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 4px 10px;
+    border-radius: 4px;
+
+    .status-icon {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+    }
+
     &.ant-tag-blue {
       background-color: #e9f3ff;
       color: #1b84ff;
     }
+
     &.ant-tag-green {
       background-color: #dfffea;
       color: #17c653;
     }
+
     &.ant-tag-red {
       background-color: #ffeef3;
       color: #f8285a;
     }
+
     &.ant-tag-orange {
       background-color: #fff8dd;
       color: #f6c000;
+    }
+
+    &.ant-tag-processing {
+      background-color: #e9f3ff;
+      color: #1b84ff;
+    }
+  }
+}
+
+// Skeleton loading styles
+.skeleton-custom-style {
+  .ant-skeleton {
+    .ant-skeleton-content {
+      .ant-skeleton-paragraph {
+        margin-bottom: 0;
+
+        li {
+          height: 48px;
+          margin-bottom: 8px;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .calls-card {
+    .calls-header {
+      .ant-row {
+        flex-direction: column;
+        gap: 1rem;
+
+        .ant-col {
+          width: 100%;
+          text-align: left !important;
+        }
+      }
+    }
+  }
+
+  .calls-table {
+    .file-name-cell {
+      .file-name {
+        max-width: 150px;
+      }
     }
   }
 }
